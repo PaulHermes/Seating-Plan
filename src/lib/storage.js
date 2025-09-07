@@ -1,6 +1,6 @@
 import localforage from "localforage";
 
-localforage.config({ name: "sitzplan" });
+localforage.config({ name: "seating-plan" });
 
 export async function saveState(key, value) {
   try {

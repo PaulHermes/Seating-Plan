@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Sitzplan',
-        short_name: 'Sitzplan',
+        name: 'seating-plan',
+        short_name: 'seating-plan',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',

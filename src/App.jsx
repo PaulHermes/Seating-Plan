@@ -147,7 +147,6 @@ export default function App() {
     setDesks((d) => d.map((desk) => (desk.id === id ? { ...desk, x, y } : desk)));
   }
 
-  // Add this function for board position updates
   function updateBoardPosition(id, x, y) {
     setBoards((b) => b.map((board) => (board.id === id ? { ...board, x, y } : board)));
   }

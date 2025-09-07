@@ -81,7 +81,7 @@ html,body,#root { height: 100%; margin: 0; background: var(--bg); }
 }
 
 .desk-header { display:flex; justify-content:space-between; align-items:center; gap:8px; }
-.desk-number { font-weight: 600; font-size: 13px; }
+.desk-number { font-weight: 600; font-size: 12px; }
 .desk-actions { display:flex; gap:6px; }
 
 .seats-row { display:flex; gap:6px; margin-top:6px; height: calc(100% - 28px); align-items:center; }

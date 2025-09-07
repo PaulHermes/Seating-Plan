@@ -38,7 +38,7 @@ export default function App() {
       const asg = (await loadState("assignments")) || {};
       const names = (await loadState("namesText")) || "";
       const gs = (await loadState("gridSize")) || 20;
-      const snap = (await loadState("snapToGrid"));
+      const snap = (await loadState("snapToGrid")) || true;
       setDesks(ds);
       setBoards(bs);
       setAssignments(asg);
@@ -401,7 +401,7 @@ export default function App() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sitzplan_snapshot.json";
+    a.download = "seating_snapshot.json";
     a.click();
     URL.revokeObjectURL(url);
   }

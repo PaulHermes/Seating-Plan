@@ -1,15 +1,16 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: '/Seating-Plan/', 
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'seating-plan',
-        short_name: 'seating-plan',
+        name: 'Seating Plan',
+        short_name: 'Seating Plan',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
@@ -20,4 +21,4 @@ export default defineConfig({
       }
     })
   ]
-})
+});

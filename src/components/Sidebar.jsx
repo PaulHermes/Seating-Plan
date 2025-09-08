@@ -84,12 +84,15 @@ export default function Sidebar({
 
       <div className="file-load">
         <label className="label">Snapshot importieren (JSON)</label>
-        <input type="file" accept="application/json" ref={fileRef} onChange={handleFileChange} />
+        <input
+          type="file"
+          accept="application/json"
+          ref={fileRef}
+          onChange={handleFileChange}
+        />
       </div>
 
-      <div className="hint">
-        Ziehe Tische im Plan.
-      </div>
+      <div className="hint">Ziehe Tische im Plan.</div>
     </div>
   );
 }

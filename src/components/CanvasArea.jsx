@@ -9,9 +9,11 @@ export default function CanvasArea({
   gridSize = 20,
   snapToGrid = true,
   updateDeskPosition,
-  updateBoardPosition, // Add this prop
+  updateBoardPosition,
   removeDesk,
+  removeBoard,
   rotateDesk,
+  rotateBoard,
   swapDeskPartners,
 }) {
   const containerRef = useRef(null);
@@ -53,7 +55,10 @@ export default function CanvasArea({
     }
 
     try {
-      if (e.currentTarget && typeof e.currentTarget.setPointerCapture === "function") {
+      if (
+        e.currentTarget &&
+        typeof e.currentTarget.setPointerCapture === "function"
+      ) {
         e.currentTarget.setPointerCapture(e.pointerId);
       }
     } catch (err) {
@@ -67,7 +72,7 @@ export default function CanvasArea({
       const dx = d.desiredX - d.originalLeft;
       const dy = d.desiredY - d.originalTop;
 
-      if (d.type === "desk") {
+      if (d.type === "desk" || d.type === "board") {
         d.target.style.transform = `translate3d(${dx}px, ${dy}px, 0) rotate(${d.originalRotate}deg)`;
       } else {
         d.target.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
@@ -118,7 +123,7 @@ export default function CanvasArea({
 
       try {
         const t = d.target;
-        if (d.type === "desk") {
+        if (d.type === "desk" || d.type === "board") {
           t.style.transform = `rotate(${d.originalRotate}deg)`;
         } else {
           t.style.transform = "";
@@ -156,17 +161,17 @@ export default function CanvasArea({
             key={desk.id}
             className="desk"
             onPointerDown={(e) => {
-  // Don’t start drag if clicking inside a button or input
-  if (e.target.closest("button, input, textarea, select")) return;
-  startDrag(e, desk, "desk");
-}}
+              // Don’t start drag if clicking inside a button or input
+              if (e.target.closest("button, input, textarea, select")) return;
+              startDrag(e, desk, "desk");
+            }}
             style={{
               left: desk.x,
               top: desk.y,
               width: desk.w,
               height: desk.h,
               transform: `rotate(${desk.rotate}deg)`,
-              touchAction: "none", 
+              touchAction: "none",
               userSelect: "none",
               position: "absolute",
             }}
@@ -175,7 +180,8 @@ export default function CanvasArea({
               <div className="desk-number">Tisch {desk.number}</div>
               <div className="desk-actions">
                 {desk.seats === 2 &&
-                  (assignments[`${desk.id}:0`] || assignments[`${desk.id}:1`]) && (
+                  (assignments[`${desk.id}:0`] ||
+                    assignments[`${desk.id}:1`]) && (
                     <button
                       className="small-btn"
                       onClick={(e) => {
@@ -185,7 +191,7 @@ export default function CanvasArea({
                     >
                       ⇄
                     </button>
-                )}
+                  )}
                 <button
                   className="small-btn"
                   onClick={(e) => {
@@ -230,7 +236,7 @@ export default function CanvasArea({
                       const currentName = assignments[key]?.name || "";
                       const newName = prompt(
                         "Name für diesen festen Platz:",
-                        currentName
+                        currentName,
                       );
                       if (newName !== null) {
                         setAssignments((prev) => ({
@@ -253,26 +259,53 @@ export default function CanvasArea({
           <div
             key={board.id}
             className="board"
-            onPointerDown={(e) => startDrag(e, board, "board")}
+            onPointerDown={(e) => {
+              if (e.target.closest("button, input, textarea, select")) return;
+              startDrag(e, board, "board");
+            }}
             style={{
               left: board.x,
               top: board.y,
               width: board.w,
               height: board.h,
-              position: "absolute",
               backgroundColor: "#047857",
               color: "#f9fafb",
+              borderRadius: "6px",
+              userSelect: "none",
+              fontWeight: "600",
+              touchAction: "none",
+              transform: `rotate(${board.rotate || 0}deg)`,
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              borderRadius: "4px",
-              cursor: "move",
-              userSelect: "none",
-              fontWeight: "bold",
-              touchAction: "none", 
+              /* remove inline padding/right/top for actions — handled by CSS */
             }}
           >
-            {board.label}
+            {/* Centered label remains centered because buttons are absolutely positioned */}
+            <div style={{ pointerEvents: "none" }}>{board.label}</div>
+
+            {/* Actions in a small absolute container so they don't affect centering */}
+            <div className="board-actions">
+              <button
+                className="small-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  rotateBoard(board.id);
+                }}
+              >
+                ⟳
+              </button>
+
+              <button
+                className="small-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeBoard(board.id);
+                }}
+              >
+                ✕
+              </button>
+            </div>
           </div>
         ))}
 

@@ -5,6 +5,7 @@ export default function Sidebar({
   namesText,
   setNamesText,
   addDesk,
+  addTeacherDesk,
   addBoard,
   generateAssignments,
   clearAssignments,
@@ -37,6 +38,9 @@ export default function Sidebar({
         </button>
         <button className="btn blackboard" onClick={() => addBoard()}>
           Tafel
+        </button>
+        <button className="btn teacher-desk" onClick={addTeacherDesk}>
+          Lehrertisch
         </button>
       </div>
 

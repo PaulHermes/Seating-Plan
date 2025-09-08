@@ -159,10 +159,10 @@ export default function CanvasArea({
         {desks.map((desk) => (
           <div
             key={desk.id}
-            className="desk"
+            className={`desk ${desk.isTeacher ? "teacher-desk" : ""}`}
             onPointerDown={(e) => {
-              // Don’t start drag if clicking inside a button or input
-              if (e.target.closest("button, input, textarea, select, .seat")) return;
+              if (e.target.closest("button, input, textarea, select, .seat"))
+                return;
               startDrag(e, desk, "desk");
             }}
             style={{
@@ -170,14 +170,16 @@ export default function CanvasArea({
               top: desk.y,
               width: desk.w,
               height: desk.h,
-              transform: `rotate(${desk.rotate}deg)`,
+              transform: `rotate(${desk.rotate || 0}deg)`,
               touchAction: "none",
               userSelect: "none",
               position: "absolute",
             }}
           >
             <div className="desk-header">
-              <div className="desk-number">Tisch {desk.number}</div>
+              <div className="desk-number">
+                {desk.isTeacher ? "Lehrer*in" : `Tisch ${desk.number}`}
+              </div>
               <div className="desk-actions">
                 {desk.seats === 2 &&
                   (assignments[`${desk.id}:0`] ||

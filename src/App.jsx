@@ -95,7 +95,9 @@ export default function App() {
   }, [snapToGrid]);
 
   function nextNumber() {
-    const max = desks.reduce((m, d) => Math.max(m, d.number || 0), 0);
+    const max = desks
+      .filter((d) => !d.isTeacher)
+      .reduce((m, d) => Math.max(m, d.number || 0), 0);
     return max + 1;
   }
 
@@ -111,6 +113,23 @@ export default function App() {
       seats: def.seats,
       number: nextNumber(),
       rotate: 0,
+    };
+    setDesks((d) => [...d, desk]);
+  }
+
+  function addTeacherDesk() {
+    const id = uid();
+    const desk = {
+      id,
+      x: 20,
+      y: 20,
+      w: 140,
+      h: 80,
+      seats: 1,
+      number: null,
+      rotate: 0,
+      isTeacher: true,
+      label: "Lehrer*in",
     };
     setDesks((d) => [...d, desk]);
   }
@@ -200,6 +219,7 @@ export default function App() {
 
     const seatsList = desks
       .slice()
+      .filter((d) => !d.isTeacher)
       .sort((a, b) => (a.number || 0) - (b.number || 0))
       .flatMap((desk) =>
         Array.from({ length: desk.seats }, (_, i) => `${desk.id}:${i}`),
@@ -481,6 +501,7 @@ export default function App() {
         namesText={namesText}
         setNamesText={setNamesText}
         addDesk={addDesk}
+        addTeacherDesk={addTeacherDesk}
         addBoard={addBoard}
         generateAssignments={generateAssignments}
         clearAssignments={clearAssignments}

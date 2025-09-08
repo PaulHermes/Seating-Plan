@@ -179,13 +179,13 @@ export default function App() {
     .map(a => a.name);
 
   const remainingNames = names.filter(n => !fixedNames.includes(n));
-
-  const shuffled = shuffle(remainingNames);
+  const shuffledSeats = shuffle(freeSeats);
+  const shuffledNames = shuffle(remainingNames);
 
   const newAssign = { ...assignments };
 
-  freeSeats.forEach((seat, i) => {
-    newAssign[seat] = { name: shuffled[i] || "", fixed: false };
+  shuffledSeats.forEach((seat, i) => {
+    newAssign[seat] = { name: shuffledNames[i] || "", fixed: false };
   });
 
   setAssignments(newAssign);

@@ -19,43 +19,128 @@ export default function CanvasArea({
 
   function startDrag(e, item, itemType = "desk") {
     e.stopPropagation();
-    const rect = containerRef.current.getBoundingClientRect();
-    const startX = e.clientX - rect.left;
-    const startY = e.clientY - rect.top;
+    if (typeof e.preventDefault === "function") e.preventDefault();
+
+    const startClientX = e.clientX;
+    const startClientY = e.clientY;
+
+    const originalLeft = item.x;
+    const originalTop = item.y;
+    const originalRotate = item.rotate || 0;
+
     draggingRef.current = {
       id: item.id,
       type: itemType,
-      ox: startX - item.x,
-      oy: startY - item.y,
+      pointerId: e.pointerId,
+      target: e.currentTarget,
+      startClientX,
+      startClientY,
+      originalLeft,
+      originalTop,
+      originalRotate,
+      desiredX: originalLeft,
+      desiredY: originalTop,
+      rafRequested: false,
+      finished: false,
     };
 
-    function onMove(ev) {
-      const p = containerRef.current.getBoundingClientRect();
-      let nx = ev.clientX - p.left - draggingRef.current.ox;
-      let ny = ev.clientY - p.top - draggingRef.current.oy;
-      if (snapToGrid) {
-        nx = Math.round(nx / gridSize) * gridSize;
-        ny = Math.round(ny / gridSize) * gridSize;
-      }
-      nx = Math.max(0, nx);
-      ny = Math.max(0, ny);
+    try {
+      const t = draggingRef.current.target;
+      t.style.willChange = "transform";
+      t.style.userSelect = "none";
+    } catch (err) {
+      // ignore
+    }
 
-      if (draggingRef.current.type === "desk") {
-        updateDeskPosition(draggingRef.current.id, nx, ny);
-      } else if (draggingRef.current.type === "board") {
-        // Use the callback instead of direct setBoards
-        updateBoardPosition(draggingRef.current.id, nx, ny);
+    try {
+      if (e.currentTarget && typeof e.currentTarget.setPointerCapture === "function") {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      }
+    } catch (err) {
+      // ignore
+    }
+
+    function applyTransform() {
+      const d = draggingRef.current;
+      if (!d || d.finished) return;
+      d.rafRequested = false;
+      const dx = d.desiredX - d.originalLeft;
+      const dy = d.desiredY - d.originalTop;
+
+      if (d.type === "desk") {
+        d.target.style.transform = `translate3d(${dx}px, ${dy}px, 0) rotate(${d.originalRotate}deg)`;
+      } else {
+        d.target.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
       }
     }
 
-    function onUp() {
+    function onMove(ev) {
+      const d = draggingRef.current;
+      if (!d || d.finished) return;
+
+      const deltaX = ev.clientX - d.startClientX;
+      const deltaY = ev.clientY - d.startClientY;
+
+      let nx = d.originalLeft + deltaX;
+      let ny = d.originalTop + deltaY;
+
+      nx = Math.max(0, nx);
+      ny = Math.max(0, ny);
+
+      d.desiredX = nx;
+      d.desiredY = ny;
+
+      if (!d.rafRequested) {
+        d.rafRequested = true;
+        requestAnimationFrame(applyTransform);
+      }
+    }
+
+    function finishDrag(ev) {
+      const d = draggingRef.current;
+      if (!d || d.finished) return;
+      d.finished = true;
+
+      let finalX = d.desiredX;
+      let finalY = d.desiredY;
+      if (snapToGrid && gridSize > 0) {
+        finalX = Math.round(finalX / gridSize) * gridSize;
+        finalY = Math.round(finalY / gridSize) * gridSize;
+      }
+      finalX = Math.max(0, finalX);
+      finalY = Math.max(0, finalY);
+
+      if (d.type === "desk") {
+        updateDeskPosition(d.id, finalX, finalY);
+      } else if (d.type === "board") {
+        updateBoardPosition(d.id, finalX, finalY);
+      }
+
+      try {
+        const t = d.target;
+        if (d.type === "desk") {
+          t.style.transform = `rotate(${d.originalRotate}deg)`;
+        } else {
+          t.style.transform = "";
+        }
+        t.style.willChange = "";
+        t.style.userSelect = "";
+        if (typeof t.releasePointerCapture === "function") {
+          t.releasePointerCapture(d.pointerId);
+        }
+      } catch (err) {
+        // ignore
+      }
+
       window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointerup", finishDrag);
+      window.removeEventListener("pointercancel", finishDrag);
       draggingRef.current = null;
     }
 
     window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointerup", finishDrag);
+    window.addEventListener("pointercancel", finishDrag);
   }
 
   return (
@@ -70,21 +155,27 @@ export default function CanvasArea({
           <div
             key={desk.id}
             className="desk"
-            onPointerDown={(e) => startDrag(e, desk, "desk")}
+            onPointerDown={(e) => {
+  // Don’t start drag if clicking inside a button or input
+  if (e.target.closest("button, input, textarea, select")) return;
+  startDrag(e, desk, "desk");
+}}
             style={{
               left: desk.x,
               top: desk.y,
               width: desk.w,
               height: desk.h,
               transform: `rotate(${desk.rotate}deg)`,
+              touchAction: "none", 
+              userSelect: "none",
+              position: "absolute",
             }}
           >
             <div className="desk-header">
               <div className="desk-number">Tisch {desk.number}</div>
               <div className="desk-actions">
                 {desk.seats === 2 &&
-                  (assignments[`${desk.id}:0`] ||
-                    assignments[`${desk.id}:1`]) && (
+                  (assignments[`${desk.id}:0`] || assignments[`${desk.id}:1`]) && (
                     <button
                       className="small-btn"
                       onClick={(e) => {
@@ -94,7 +185,7 @@ export default function CanvasArea({
                     >
                       ⇄
                     </button>
-                  )}
+                )}
                 <button
                   className="small-btn"
                   onClick={(e) => {
@@ -178,6 +269,7 @@ export default function CanvasArea({
               cursor: "move",
               userSelect: "none",
               fontWeight: "bold",
+              touchAction: "none", 
             }}
           >
             {board.label}

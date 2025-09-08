@@ -25,6 +25,7 @@ function shuffle(arr) {
 export default function App() {
   const [desks, setDesks] = useState([]);
   const [boards, setBoards] = useState([]);
+  const [shelves, setShelves] = useState([]);
   const [assignments, setAssignments] = useState({});
   const [namesText, setNamesText] = useState("");
   const [gridSize, setGridSize] = useState(20);
@@ -35,6 +36,7 @@ export default function App() {
     (async () => {
       const ds = (await loadState("desks")) || [];
       const bs = (await loadState("boards")) || [];
+      const bshelves = (await loadState("shelves")) || [];
       const asg = (await loadState("assignments")) || {};
       const names = (await loadState("namesText")) || "";
       const gs = (await loadState("gridSize")) || 20;
@@ -51,6 +53,12 @@ export default function App() {
         bs.map((b) => ({
           ...b,
           rotate: typeof b.rotate === "number" ? b.rotate : 0,
+        })),
+      );
+      setShelves(
+        bshelves.map((s) => ({
+          ...s,
+          rotate: typeof s.rotate === "number" ? s.rotate : 0,
         })),
       );
 
@@ -73,6 +81,11 @@ export default function App() {
       saveState("boards", boards);
     }
   }, [boards]);
+  useEffect(() => {
+    if (shelves.length > 0) {
+      saveState("shelves", shelves);
+    }
+  }, [shelves]);
   useEffect(() => {
     if (Object.keys(assignments).length > 0) {
       saveState("assignments", assignments);
@@ -98,6 +111,11 @@ export default function App() {
     const max = desks
       .filter((d) => !d.isTeacher)
       .reduce((m, d) => Math.max(m, d.number || 0), 0);
+    return max + 1;
+  }
+
+  function nextShelfNumber(shelves) {
+    const max = shelves.reduce((m, s) => Math.max(m, s.number || 0), 0);
     return max + 1;
   }
 
@@ -148,6 +166,25 @@ export default function App() {
     setBoards((prev) => [...prev, board]);
   }
 
+  function addShelf() {
+    const id = `s-${Date.now().toString(36)}-${Math.random()
+      .toString(36)
+      .slice(2, 6)}`;
+
+    setShelves((prev) => {
+      const shelf = {
+        id,
+        x: 60,
+        y: 60,
+        w: 160,
+        h: 40,
+        number: nextShelfNumber(prev), // 🔑 own counter
+        rotate: 0,
+      };
+      return [...prev, shelf];
+    });
+  }
+
   function removeDesk(id) {
     setDesks((d) => d.filter((x) => x.id !== id));
     setAssignments((a) => {
@@ -161,6 +198,10 @@ export default function App() {
 
   function removeBoard(id) {
     setBoards((b) => b.filter((x) => x.id !== id));
+  }
+
+  function removeShelf(id) {
+    setShelves((s) => s.filter((x) => x.id !== id));
   }
 
   function rotateDesk(id) {
@@ -179,6 +220,14 @@ export default function App() {
         board.id === id
           ? { ...board, rotate: ((board.rotate || 0) + 90) % 360 }
           : board,
+      ),
+    );
+  }
+
+  function rotateShelf(id) {
+    setShelves((s) =>
+      s.map((sh) =>
+        sh.id === id ? { ...sh, rotate: ((sh.rotate || 0) + 90) % 360 } : sh,
       ),
     );
   }
@@ -204,6 +253,10 @@ export default function App() {
     setBoards((b) =>
       b.map((board) => (board.id === id ? { ...board, x, y } : board)),
     );
+  }
+
+  function updateShelfPosition(id, x, y) {
+    setShelves((s) => s.map((sh) => (sh.id === id ? { ...sh, x, y } : sh)));
   }
 
   function generateAssignments() {
@@ -272,6 +325,7 @@ export default function App() {
 
     const desks = el.querySelectorAll(".desk");
     const boards = el.querySelectorAll(".board");
+    const shelves = el.querySelectorAll(".shelf");
     let minX = Infinity,
       minY = Infinity,
       maxX = -Infinity,
@@ -279,6 +333,7 @@ export default function App() {
 
     const originalDeskStyles = [];
     const originalBoardStyles = [];
+    const originalShelfStyles = [];
 
     desks.forEach((desk, index) => {
       const rect = desk.getBoundingClientRect();
@@ -320,6 +375,26 @@ export default function App() {
       maxY = Math.max(maxY, y + height);
     });
 
+    shelves.forEach((shelf, index) => {
+      const rect = shelf.getBoundingClientRect();
+      const containerRect = el.getBoundingClientRect();
+
+      const x = rect.left - containerRect.left;
+      const y = rect.top - containerRect.top;
+      const width = rect.width;
+      const height = rect.height;
+
+      originalShelfStyles[index] = {
+        left: shelf.style.left,
+        top: shelf.style.top,
+      };
+
+      minX = Math.min(minX, x);
+      minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x + width);
+      maxY = Math.max(maxY, y + height);
+    });
+
     const offsetX = minX;
     const offsetY = minY;
 
@@ -335,6 +410,13 @@ export default function App() {
       const currentTop = parseFloat(board.style.top) || 0;
       board.style.left = currentLeft - offsetX + "px";
       board.style.top = currentTop - offsetY + "px";
+    });
+
+    shelves.forEach((shelf) => {
+      const currentLeft = parseFloat(shelf.style.left) || 0;
+      const currentTop = parseFloat(shelf.style.top) || 0;
+      shelf.style.left = currentLeft - offsetX + "px";
+      shelf.style.top = currentTop - offsetY + "px";
     });
 
     const contentWidth = maxX - minX;
@@ -443,6 +525,11 @@ export default function App() {
         board.style.top = originalBoardStyles[index].top;
       });
 
+      shelves.forEach((shelf, index) => {
+        shelf.style.left = originalShelfStyles[index].left;
+        shelf.style.top = originalShelfStyles[index].top;
+      });
+
       buttons.forEach((b) => (b.style.display = ""));
       if (legend) legend.style.display = "";
       if (grid) grid.style.backgroundImage = "";
@@ -460,6 +547,7 @@ export default function App() {
     const data = {
       desks,
       boards,
+      shelves,
       assignments,
       namesText,
       gridSize,
@@ -483,6 +571,7 @@ export default function App() {
         const data = JSON.parse(e.target.result);
         if (data.desks) setDesks(data.desks);
         if (data.boards) setBoards(data.boards);
+        if (data.shelves) setShelves(data.shelves);
         if (data.assignments !== undefined) setAssignments(data.assignments);
         if (data.namesText) setNamesText(data.namesText);
         if (data.gridSize) setGridSize(data.gridSize);
@@ -503,6 +592,7 @@ export default function App() {
         addDesk={addDesk}
         addTeacherDesk={addTeacherDesk}
         addBoard={addBoard}
+        addShelf={addShelf}
         generateAssignments={generateAssignments}
         clearAssignments={clearAssignments}
         printPlan={printPlan}
@@ -517,17 +607,22 @@ export default function App() {
       <CanvasArea
         desks={desks}
         boards={boards}
+        shelves={shelves}
         setBoards={setBoards}
+        setShelves={setShelves}
         assignments={assignments}
         setAssignments={setAssignments}
         gridSize={gridSize}
         snapToGrid={snapToGrid}
         updateDeskPosition={updateDeskPosition}
         updateBoardPosition={updateBoardPosition}
+        updateShelfPosition={updateShelfPosition}
         removeDesk={removeDesk}
         removeBoard={removeBoard}
+        removeShelf={removeShelf}
         rotateDesk={rotateDesk}
         rotateBoard={rotateBoard}
+        rotateShelf={rotateShelf}
         swapDeskPartners={swapDeskPartners}
       />
     </div>

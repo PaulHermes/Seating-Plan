@@ -3,17 +3,22 @@ import React, { useRef } from "react";
 export default function CanvasArea({
   desks,
   boards,
+  shelves,
   setBoards,
+  setShelves,
   assignments,
   setAssignments,
   gridSize = 20,
   snapToGrid = true,
   updateDeskPosition,
   updateBoardPosition,
+  updateShelfPosition,
   removeDesk,
   removeBoard,
+  removeShelf,
   rotateDesk,
   rotateBoard,
+  rotateShelf,
   swapDeskPartners,
 }) {
   const containerRef = useRef(null);
@@ -72,7 +77,7 @@ export default function CanvasArea({
       const dx = d.desiredX - d.originalLeft;
       const dy = d.desiredY - d.originalTop;
 
-      if (d.type === "desk" || d.type === "board") {
+      if (d.type === "desk" || d.type === "board" || d.type === "shelf") {
         d.target.style.transform = `translate3d(${dx}px, ${dy}px, 0) rotate(${d.originalRotate}deg)`;
       } else {
         d.target.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
@@ -119,11 +124,13 @@ export default function CanvasArea({
         updateDeskPosition(d.id, finalX, finalY);
       } else if (d.type === "board") {
         updateBoardPosition(d.id, finalX, finalY);
+      } else if (d.type === "shelf") {
+        updateShelfPosition(d.id, finalX, finalY);
       }
 
       try {
         const t = d.target;
-        if (d.type === "desk" || d.type === "board") {
+        if (d.type === "desk" || d.type === "board" || d.type === "shelf") {
           t.style.transform = `rotate(${d.originalRotate}deg)`;
         } else {
           t.style.transform = "";
@@ -307,6 +314,55 @@ export default function CanvasArea({
               >
                 ✕
               </button>
+            </div>
+          </div>
+        ))}
+        {shelves.map((shelf) => (
+          <div
+            key={shelf.id}
+            className="shelf"
+            onPointerDown={(e) => {
+              if (e.target.closest("button, input, textarea, select")) return;
+              startDrag(e, shelf, "shelf");
+            }}
+            style={{
+              left: shelf.x,
+              top: shelf.y,
+              width: shelf.w,
+              height: shelf.h,
+              transform: `rotate(${shelf.rotate || 0}deg)`,
+              position: "absolute",
+              background: "#8b5cf6",
+              borderRadius: "6px",
+              padding: "6px",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+              cursor: "grab",
+              userSelect: "none",
+              touchAction: "none",
+            }}
+          >
+            <div className="desk-header">
+              <div className="desk-number">Regal {shelf.number}</div>
+              <div className="desk-actions">
+                <button
+                  className="small-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    rotateShelf(shelf.id);
+                  }}
+                >
+                  ⟳
+                </button>
+                <button
+                  className="small-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeShelf(shelf.id);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           </div>
         ))}

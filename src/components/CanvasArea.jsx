@@ -162,7 +162,7 @@ export default function CanvasArea({
             className="desk"
             onPointerDown={(e) => {
               // Don’t start drag if clicking inside a button or input
-              if (e.target.closest("button, input, textarea, select")) return;
+              if (e.target.closest("button, input, textarea, select, .seat")) return;
               startDrag(e, desk, "desk");
             }}
             style={{

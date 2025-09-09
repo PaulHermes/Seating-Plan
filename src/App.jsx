@@ -32,6 +32,7 @@ export default function App() {
   const [namesText, setNamesText] = useState("");
   const [gridSize, setGridSize] = useState(20);
   const [snapToGrid, setSnapToGrid] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   // load saved state on mount
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function App() {
       const asg = (await loadState("assignments")) || {};
       const names = (await loadState("namesText")) || "";
       const gs = (await loadState("gridSize")) || 20;
-      const snap = (await loadState("snapToGrid")) || true;
+      const snap = await loadState("snapToGrid");
 
       // Ensure rotate exists and is numeric (migration for older saved data)
       setDesks(
@@ -108,12 +109,14 @@ export default function App() {
     }
   }, [namesText]);
   useEffect(() => {
-    if (gridSize !== 20) {
+    if (mounted) {
       saveState("gridSize", gridSize);
+    } else {
+      setMounted(true);
     }
   }, [gridSize]);
   useEffect(() => {
-    if (snapToGrid !== true) {
+    if (mounted) {
       saveState("snapToGrid", snapToGrid);
     }
   }, [snapToGrid]);

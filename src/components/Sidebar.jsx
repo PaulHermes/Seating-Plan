@@ -34,6 +34,7 @@ export default function Sidebar({
   const [tplRot, setTplRot] = useState(true);
   const [tplDel, setTplDel] = useState(true);
   const [tplSaving, setTplSaving] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   function handleFileChange(e) {
     const f = e.target.files && e.target.files[0];
@@ -94,6 +95,29 @@ export default function Sidebar({
   return (
     <div className="sidebar">
       <h3>Sitzplan</h3>
+      <div style={{ position: "absolute", top: 8, right: 8 }}>
+        <button
+          className="small-btn"
+          onClick={() => setSettingsOpen(true)}
+          title="Einstellungen"
+          style={{
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            padding: 0,
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="25"
+            height="25"
+            fill="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path d="M19.14,12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5,0,0,0,.12-.65l-1.92-3.32a.5.5,0,0,0-.61-.22l-2.39.96a7.07,7.07,0,0,0-1.63-.94l-.36-2.54A.5.5,0,0,0,14,2H10a.5.5,0,0,0-.5.42L9.14,4.96a7.07,7.07,0,0,0-1.63.94l-2.39-.96a.5.5,0,0,0-.61.22L2.59,8.48a.5.5,0,0,0,.12.65L4.74,10.7c-.04.31-.06.63-.06.94s.02.63.06.94L2.71,14.16a.5.5,0,0,0-.12.65l1.92,3.32c.14.24.43.34.7.22l2.39-.96c.49.39,1.04.71,1.63.94l.36,2.54A.5.5,0,0,0,10,22h4a.5.5,0,0,0,.5-.42l.36-2.54c.59-.23,1.14-.55,1.63-.94l2.39.96c.27.11.56.02.7-.22l1.92-3.32a.5.5,0,0,0-.12-.65ZM12,15.5A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
+          </svg>
+        </button>
+      </div>
 
       <div className="btn-row">
         <button className="btn primary" onClick={() => addDesk("single")}>
@@ -185,22 +209,6 @@ export default function Sidebar({
         </div>
       </div>
 
-      <label className="label">Rastergröße: {gridSize}px</label>
-      <input
-        type="range"
-        min={20}
-        max={80}
-        value={gridSize}
-        onChange={(e) => setGridSize(Number(e.target.value))}
-      />
-      <label className="checkbox">
-        <input
-          type="checkbox"
-          checked={snapToGrid}
-          onChange={(e) => setSnapToGrid(e.target.checked)}
-        />
-        Einrasten an
-      </label>
       <div
         style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 12 }}
       >
@@ -224,20 +232,12 @@ export default function Sidebar({
           <button className="btn yellow" onClick={printPlan}>
             Drucken
           </button>
-          <button className="btn" onClick={saveSnapshot}>
-            Snapshot speichern
-          </button>
         </div>
-
-        <div className="file-load">
-          <label className="label">Snapshot importieren (JSON)</label>
-          <input
-            type="file"
-            accept="application/json"
-            ref={fileRef}
-            onChange={handleFileChange}
-          />
-        </div>
+      </div>
+      <div className="btn-col">
+        <button className="btn" onClick={() => setSettingsOpen(true)}>
+          Einstellungen
+        </button>
       </div>
       <div className="hint">Ziehe Tische im Plan.</div>
 
@@ -366,6 +366,105 @@ export default function Sidebar({
                   {tplSaving ? "Speichern…" : "Vorlage speichern"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {settingsOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: "fixed",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(0,0,0,0.35)",
+            zIndex: 9999,
+          }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setSettingsOpen(false);
+          }}
+        >
+          <div
+            style={{
+              width: 420,
+              maxWidth: "calc(100% - 24px)",
+              background: "#fff",
+              borderRadius: 8,
+              padding: 16,
+              boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
+            }}
+          >
+            <h3 style={{ marginTop: 0 }}>Einstellungen</h3>
+
+            <div
+              style={{
+                marginTop: 12,
+                borderTop: "1px solid #eee",
+                paddingTop: 12,
+              }}
+            >
+              <div className="grid-size-container">
+                <div className="grid-size-label">Rastergröße: {gridSize}</div>
+                <input
+                  type="range"
+                  min={20}
+                  max={80}
+                  value={gridSize}
+                  onChange={(e) => setGridSize(Number(e.target.value))}
+                />
+              </div>
+              <label className="checkbox">
+                <input
+                  type="checkbox"
+                  checked={snapToGrid}
+                  onChange={(e) => setSnapToGrid(e.target.checked)}
+                />
+                Einrasten an
+              </label>
+            </div>
+            <div
+              style={{
+                marginTop: 12,
+                borderTop: "1px solid #eee",
+                paddingTop: 12,
+              }}
+            >
+              <div className="btn-col" style={{ marginTop: 16 }}>
+                <button className="btn" onClick={saveSnapshot}>
+                  Snapshot speichern
+                </button>
+
+                <button
+                  className="btn"
+                  onClick={() => fileRef.current && fileRef.current.click()}
+                  style={{ marginTop: 8 }}
+                >
+                  Snapshot importieren
+                </button>
+                <input
+                  type="file"
+                  accept="application/json"
+                  ref={fileRef}
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 8,
+                marginTop: 16,
+              }}
+            >
+              <button className="btn" onClick={() => setSettingsOpen(false)}>
+                Schließen
+              </button>
             </div>
           </div>
         </div>

@@ -4,6 +4,8 @@ export default function CanvasArea({
   desks,
   boards,
   shelves,
+  customObjects,
+  templates,
   setBoards,
   setShelves,
   assignments,
@@ -13,12 +15,15 @@ export default function CanvasArea({
   updateDeskPosition,
   updateBoardPosition,
   updateShelfPosition,
+  updateCustomObjectPosition,
   removeDesk,
   removeBoard,
   removeShelf,
+  removeCustomObject,
   rotateDesk,
   rotateBoard,
   rotateShelf,
+  rotateCustomObject,
   swapDeskPartners,
 }) {
   const containerRef = useRef(null);
@@ -77,7 +82,12 @@ export default function CanvasArea({
       const dx = d.desiredX - d.originalLeft;
       const dy = d.desiredY - d.originalTop;
 
-      if (d.type === "desk" || d.type === "board" || d.type === "shelf") {
+      if (
+        d.type === "desk" ||
+        d.type === "board" ||
+        d.type === "shelf" ||
+        d.type === "custom"
+      ) {
         d.target.style.transform = `translate3d(${dx}px, ${dy}px, 0) rotate(${d.originalRotate}deg)`;
       } else {
         d.target.style.transform = `translate3d(${dx}px, ${dy}px, 0)`;
@@ -126,11 +136,18 @@ export default function CanvasArea({
         updateBoardPosition(d.id, finalX, finalY);
       } else if (d.type === "shelf") {
         updateShelfPosition(d.id, finalX, finalY);
+      } else if (d.type === "custom") {
+        updateCustomObjectPosition(d.id, finalX, finalY);
       }
 
       try {
         const t = d.target;
-        if (d.type === "desk" || d.type === "board" || d.type === "shelf") {
+        if (
+          d.type === "desk" ||
+          d.type === "board" ||
+          d.type === "shelf" ||
+          d.type === "custom"
+        ) {
           t.style.transform = `rotate(${d.originalRotate}deg)`;
         } else {
           t.style.transform = "";
@@ -287,13 +304,10 @@ export default function CanvasArea({
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              /* remove inline padding/right/top for actions — handled by CSS */
             }}
           >
-            {/* Centered label remains centered because buttons are absolutely positioned */}
             <div style={{ pointerEvents: "none" }}>{board.label}</div>
 
-            {/* Actions in a small absolute container so they don't affect centering */}
             <div className="board-actions">
               <button
                 className="small-btn"
@@ -317,6 +331,7 @@ export default function CanvasArea({
             </div>
           </div>
         ))}
+
         {shelves.map((shelf) => (
           <div
             key={shelf.id}
@@ -366,6 +381,71 @@ export default function CanvasArea({
             </div>
           </div>
         ))}
+
+        {customObjects.map((obj) => {
+          const tpl = templates?.find((t) => t.id === obj.templateId) || {};
+          const bg = tpl.color || "#ddd";
+          const textColor = tpl.textColor || "#111";
+          const isRotatable = tpl.rotatable !== false;
+          const isDeletable = tpl.deletable !== false;
+
+          return (
+            <div
+              key={obj.id}
+              className="custom-object"
+              onPointerDown={(e) => {
+                if (e.target.closest("button, input, textarea, select")) return;
+                startDrag(e, obj, "custom");
+              }}
+              style={{
+                left: obj.x,
+                top: obj.y,
+                width: obj.w,
+                height: obj.h,
+                position: "absolute",
+                backgroundColor: bg,
+                color: textColor,
+                borderRadius: "6px",
+                padding: "6px",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+                cursor: "grab",
+                userSelect: "none",
+                touchAction: "none",
+                transform: `rotate(${obj.rotate || 0}deg)`,
+              }}
+            >
+              <div className="desk-header">
+                <div className="desk-number" style={{ pointerEvents: "none" }}>
+                  {obj.label}
+                </div>
+                <div className="desk-actions" style={{ pointerEvents: "auto" }}>
+                  {isRotatable && (
+                    <button
+                      className="small-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        rotateCustomObject(obj.id);
+                      }}
+                    >
+                      ⟳
+                    </button>
+                  )}
+                  {isDeletable && (
+                    <button
+                      className="small-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeCustomObject(obj.id);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
 
         <div className="legend">
           T = Tischnummer · Doppeltische haben 2 Sitze

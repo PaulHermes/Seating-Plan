@@ -26,6 +26,8 @@ export default function App() {
   const [desks, setDesks] = useState([]);
   const [boards, setBoards] = useState([]);
   const [shelves, setShelves] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [customObjects, setCustomObjects] = useState([]);
   const [assignments, setAssignments] = useState({});
   const [namesText, setNamesText] = useState("");
   const [gridSize, setGridSize] = useState(20);
@@ -37,6 +39,8 @@ export default function App() {
       const ds = (await loadState("desks")) || [];
       const bs = (await loadState("boards")) || [];
       const bshelves = (await loadState("shelves")) || [];
+      const ts = (await loadState("templates")) || [];
+      const cos = (await loadState("customObjects")) || [];
       const asg = (await loadState("assignments")) || {};
       const names = (await loadState("namesText")) || "";
       const gs = (await loadState("gridSize")) || 20;
@@ -61,7 +65,8 @@ export default function App() {
           rotate: typeof s.rotate === "number" ? s.rotate : 0,
         })),
       );
-
+      setTemplates(ts);
+      setCustomObjects(cos);
       setAssignments(asg);
       setNamesText(names);
       setGridSize(gs);
@@ -86,6 +91,12 @@ export default function App() {
       saveState("shelves", shelves);
     }
   }, [shelves]);
+  useEffect(() => {
+    if (templates.length > 0) saveState("templates", templates);
+  }, [templates]);
+  useEffect(() => {
+    if (customObjects.length > 0) saveState("customObjects", customObjects);
+  }, [customObjects]);
   useEffect(() => {
     if (Object.keys(assignments).length > 0) {
       saveState("assignments", assignments);
@@ -178,11 +189,51 @@ export default function App() {
         y: 60,
         w: 160,
         h: 40,
-        number: nextShelfNumber(prev), // 🔑 own counter
+        number: nextShelfNumber(prev),
         rotate: 0,
       };
       return [...prev, shelf];
     });
+  }
+
+  function addTemplate(template) {
+    const id = `tpl-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    setTemplates((prev) => [...prev, { id, ...template }]);
+  }
+
+  function createFromTemplate(templateId, opts = {}) {
+    const tpl = templates.find((t) => t.id === templateId);
+    if (!tpl) return;
+    const id = `o-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    const obj = {
+      id,
+      templateId,
+      x: opts.x ?? 50,
+      y: opts.y ?? 50,
+      w: opts.w ?? tpl.w,
+      h: opts.h ?? tpl.h,
+      rotate: 0,
+      label: opts.label ?? tpl.label ?? tpl.name,
+    };
+    setCustomObjects((prev) => [...prev, obj]);
+  }
+
+  function removeCustomObject(id) {
+    setCustomObjects((prev) => prev.filter((o) => o.id !== id));
+  }
+
+  function rotateCustomObject(id) {
+    setCustomObjects((prev) =>
+      prev.map((o) =>
+        o.id === id ? { ...o, rotate: ((o.rotate || 0) + 90) % 360 } : o,
+      ),
+    );
+  }
+
+  function updateCustomObjectPosition(id, x, y) {
+    setCustomObjects((prev) =>
+      prev.map((o) => (o.id === id ? { ...o, x, y } : o)),
+    );
   }
 
   function removeDesk(id) {
@@ -323,9 +374,11 @@ export default function App() {
     if (legend) legend.style.display = "none";
     if (grid) grid.style.backgroundImage = "none";
 
-    const desks = el.querySelectorAll(".desk");
-    const boards = el.querySelectorAll(".board");
-    const shelves = el.querySelectorAll(".shelf");
+    const deskNodes = el.querySelectorAll(".desk");
+    const boardNodes = el.querySelectorAll(".board");
+    const shelfNodes = el.querySelectorAll(".shelf");
+    const customNodes = el.querySelectorAll(".custom-object");
+
     let minX = Infinity,
       minY = Infinity,
       maxX = -Infinity,
@@ -334,89 +387,78 @@ export default function App() {
     const originalDeskStyles = [];
     const originalBoardStyles = [];
     const originalShelfStyles = [];
+    const originalCustomStyles = [];
 
-    desks.forEach((desk, index) => {
-      const rect = desk.getBoundingClientRect();
-      const containerRect = el.getBoundingClientRect();
+    function measureNodes(nodeList, originalStylesArr) {
+      nodeList.forEach((node, index) => {
+        const rect = node.getBoundingClientRect();
+        const containerRect = el.getBoundingClientRect();
 
-      const x = rect.left - containerRect.left;
-      const y = rect.top - containerRect.top;
-      const width = rect.width;
-      const height = rect.height;
+        const x = rect.left - containerRect.left;
+        const y = rect.top - containerRect.top;
+        const width = rect.width;
+        const height = rect.height;
 
-      originalDeskStyles[index] = {
-        left: desk.style.left,
-        top: desk.style.top,
-      };
+        originalStylesArr[index] = {
+          left: node.style.left,
+          top: node.style.top,
+        };
 
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x + width);
-      maxY = Math.max(maxY, y + height);
-    });
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x + width);
+        maxY = Math.max(maxY, y + height);
+      });
+    }
 
-    boards.forEach((board, index) => {
-      const rect = board.getBoundingClientRect();
-      const containerRect = el.getBoundingClientRect();
+    measureNodes(deskNodes, originalDeskStyles);
+    measureNodes(boardNodes, originalBoardStyles);
+    measureNodes(shelfNodes, originalShelfStyles);
+    measureNodes(customNodes, originalCustomStyles);
 
-      const x = rect.left - containerRect.left;
-      const y = rect.top - containerRect.top;
-      const width = rect.width;
-      const height = rect.height;
-
-      originalBoardStyles[index] = {
-        left: board.style.left,
-        top: board.style.top,
-      };
-
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x + width);
-      maxY = Math.max(maxY, y + height);
-    });
-
-    shelves.forEach((shelf, index) => {
-      const rect = shelf.getBoundingClientRect();
-      const containerRect = el.getBoundingClientRect();
-
-      const x = rect.left - containerRect.left;
-      const y = rect.top - containerRect.top;
-      const width = rect.width;
-      const height = rect.height;
-
-      originalShelfStyles[index] = {
-        left: shelf.style.left,
-        top: shelf.style.top,
-      };
-
-      minX = Math.min(minX, x);
-      minY = Math.min(minY, y);
-      maxX = Math.max(maxX, x + width);
-      maxY = Math.max(maxY, y + height);
-    });
+    if (
+      minX === Infinity ||
+      minY === Infinity ||
+      maxX === -Infinity ||
+      maxY === -Infinity
+    ) {
+      buttons.forEach((b) => (b.style.display = ""));
+      if (legend) legend.style.display = "";
+      if (grid) grid.style.backgroundImage = "";
+      el.classList.remove("capture-mode");
+      alert("Keine Elemente zum Drucken gefunden.");
+      return;
+    }
 
     const offsetX = minX;
     const offsetY = minY;
 
-    desks.forEach((desk) => {
-      const currentLeft = parseFloat(desk.style.left) || 0;
-      const currentTop = parseFloat(desk.style.top) || 0;
-      desk.style.left = currentLeft - offsetX + "px";
-      desk.style.top = currentTop - offsetY + "px";
+    deskNodes.forEach((node) => {
+      const currentLeft = parseFloat(node.style.left) || 0;
+      const currentTop = parseFloat(node.style.top) || 0;
+      node.style.left = currentLeft - offsetX + "px";
+      node.style.top = currentTop - offsetY + "px";
     });
 
-    boards.forEach((board) => {
-      const currentLeft = parseFloat(board.style.left) || 0;
-      const currentTop = parseFloat(board.style.top) || 0;
-      board.style.left = currentLeft - offsetX + "px";
-      board.style.top = currentTop - offsetY + "px";
+    boardNodes.forEach((node) => {
+      const currentLeft = parseFloat(node.style.left) || 0;
+      const currentTop = parseFloat(node.style.top) || 0;
+      node.style.left = currentLeft - offsetX + "px";
+      node.style.top = currentTop - offsetY + "px";
     });
 
-    shelves.forEach((shelf) => {
-      const currentLeft = parseFloat(shelf.style.left) || 0;
-      const currentTop = parseFloat(shelf.style.top) || 0;
-      shelf.style.left = currentLeft - offsetX + "px";
-      shelf.style.top = currentTop - offsetY + "px";
+    shelfNodes.forEach((node) => {
+      const currentLeft = parseFloat(node.style.left) || 0;
+      const currentTop = parseFloat(node.style.top) || 0;
+      node.style.left = currentLeft - offsetX + "px";
+      node.style.top = currentTop - offsetY + "px";
+    });
+
+    customNodes.forEach((node) => {
+      const currentLeft = parseFloat(node.style.left) || 0;
+      const currentTop = parseFloat(node.style.top) || 0;
+      node.style.left = currentLeft - offsetX + "px";
+      node.style.top = currentTop - offsetY + "px";
     });
 
     const contentWidth = maxX - minX;
@@ -450,42 +492,13 @@ export default function App() {
           <title>Sitzplan</title>
           <meta charset="utf-8"/>
           <style>
-            * {
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-            }
-            html, body {
-              height: 100vh;
-              width: 100vw;
-              background: #fff;
-              overflow: hidden;
-            }
-            @page {
-              size: A4 landscape;
-              margin: 5mm; /* Minimaler Rand für Drucker */
-            }
-            img {
-              width: 100vw;
-              height: 100vh;
-              object-fit: contain; /* Behält Seitenverhältnis bei */
-              object-position: center;
-              display: block;
-            }
+            * { margin:0; padding:0; box-sizing:border-box; }
+            html,body { height:100vh; width:100vw; background:#fff; overflow:hidden; }
+            @page { size: A4 landscape; margin: 5mm; }
+            img { width:100vw; height:100vh; object-fit:contain; object-position:center; display:block; }
             @media print {
-              html, body {
-                height: 100% !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                -webkit-print-color-adjust: exact;
-              }
-              img {
-                width: calc(100% - 10mm) !important; /* Abzüglich der page margins */
-                height: calc(100% - 10mm) !important;
-                object-fit: contain !important;
-                margin: 5mm;
-              }
+              html, body { height:100% !important; width:100% !important; margin:0 !important; padding:0 !important; -webkit-print-color-adjust:exact; }
+              img { width: calc(100% - 10mm) !important; height: calc(100% - 10mm) !important; object-fit: contain !important; margin:5mm; }
             }
           </style>
         </head>
@@ -493,9 +506,7 @@ export default function App() {
           <img src="${imgData}" alt="Sitzplan" />
           <script>
             window.onload = function() {
-              setTimeout(function(){
-                window.print();
-              }, 500);
+              setTimeout(function(){ window.print(); }, 500);
             };
           </script>
         </body>
@@ -515,19 +526,48 @@ export default function App() {
       el.style.height = originalContainerStyle.height;
       el.style.overflow = originalContainerStyle.overflow;
 
-      desks.forEach((desk, index) => {
-        desk.style.left = originalDeskStyles[index].left;
-        desk.style.top = originalDeskStyles[index].top;
+      deskNodes.forEach((node, index) => {
+        const s = originalDeskStyles[index];
+        if (s) {
+          node.style.left = s.left;
+          node.style.top = s.top;
+        } else {
+          node.style.left = "";
+          node.style.top = "";
+        }
       });
 
-      boards.forEach((board, index) => {
-        board.style.left = originalBoardStyles[index].left;
-        board.style.top = originalBoardStyles[index].top;
+      boardNodes.forEach((node, index) => {
+        const s = originalBoardStyles[index];
+        if (s) {
+          node.style.left = s.left;
+          node.style.top = s.top;
+        } else {
+          node.style.left = "";
+          node.style.top = "";
+        }
       });
 
-      shelves.forEach((shelf, index) => {
-        shelf.style.left = originalShelfStyles[index].left;
-        shelf.style.top = originalShelfStyles[index].top;
+      shelfNodes.forEach((node, index) => {
+        const s = originalShelfStyles[index];
+        if (s) {
+          node.style.left = s.left;
+          node.style.top = s.top;
+        } else {
+          node.style.left = "";
+          node.style.top = "";
+        }
+      });
+
+      customNodes.forEach((node, index) => {
+        const s = originalCustomStyles[index];
+        if (s) {
+          node.style.left = s.left;
+          node.style.top = s.top;
+        } else {
+          node.style.left = "";
+          node.style.top = "";
+        }
       });
 
       buttons.forEach((b) => (b.style.display = ""));
@@ -593,6 +633,10 @@ export default function App() {
         addTeacherDesk={addTeacherDesk}
         addBoard={addBoard}
         addShelf={addShelf}
+        templates={templates}
+        addTemplate={addTemplate}
+        createFromTemplate={createFromTemplate}
+        setTemplates={setTemplates}
         generateAssignments={generateAssignments}
         clearAssignments={clearAssignments}
         printPlan={printPlan}
@@ -610,6 +654,12 @@ export default function App() {
         shelves={shelves}
         setBoards={setBoards}
         setShelves={setShelves}
+        templates={templates}
+        customObjects={customObjects}
+        createFromTemplate={createFromTemplate}
+        removeCustomObject={removeCustomObject}
+        rotateCustomObject={rotateCustomObject}
+        updateCustomObjectPosition={updateCustomObjectPosition}
         assignments={assignments}
         setAssignments={setAssignments}
         gridSize={gridSize}

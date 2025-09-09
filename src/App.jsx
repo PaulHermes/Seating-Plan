@@ -32,7 +32,7 @@ export default function App() {
   const [namesText, setNamesText] = useState("");
   const [gridSize, setGridSize] = useState(20);
   const [snapToGrid, setSnapToGrid] = useState(true);
-  const [mounted, setMounted] = useState(false);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   // load saved state on mount
   useEffect(() => {
@@ -72,54 +72,56 @@ export default function App() {
       setNamesText(names);
       setGridSize(gs);
       setSnapToGrid(snap === undefined ? true : snap);
+
+      setInitialLoadComplete(true);
     })();
   }, []);
 
-  // persist on change
   useEffect(() => {
-    if (desks.length > 0) {
+    if (initialLoadComplete) {
       saveState("desks", desks);
     }
-  }, [desks]);
-
+  }, [desks, initialLoadComplete]);
   useEffect(() => {
-    if (boards.length > 0) {
+    if (initialLoadComplete) {
       saveState("boards", boards);
     }
-  }, [boards]);
+  }, [boards, initialLoadComplete]);
   useEffect(() => {
-    if (shelves.length > 0) {
+    if (initialLoadComplete) {
       saveState("shelves", shelves);
     }
-  }, [shelves]);
+  }, [shelves, initialLoadComplete]);
   useEffect(() => {
-    if (templates.length > 0) saveState("templates", templates);
-  }, [templates]);
+    if (initialLoadComplete) {
+      saveState("templates", templates);
+    }
+  }, [templates, initialLoadComplete]);
   useEffect(() => {
-    if (customObjects.length > 0) saveState("customObjects", customObjects);
-  }, [customObjects]);
+    if (initialLoadComplete) {
+      saveState("customObjects", customObjects);
+    }
+  }, [customObjects, initialLoadComplete]);
   useEffect(() => {
-    if (Object.keys(assignments).length > 0) {
+    if (initialLoadComplete) {
       saveState("assignments", assignments);
     }
-  }, [assignments]);
+  }, [assignments, initialLoadComplete]);
   useEffect(() => {
-    if (Object.keys(namesText).length > 0) {
+    if (initialLoadComplete) {
       saveState("namesText", namesText);
     }
-  }, [namesText]);
+  }, [namesText, initialLoadComplete]);
   useEffect(() => {
-    if (mounted) {
+    if (initialLoadComplete) {
       saveState("gridSize", gridSize);
-    } else {
-      setMounted(true);
     }
-  }, [gridSize]);
+  }, [gridSize, initialLoadComplete]);
   useEffect(() => {
-    if (mounted) {
+    if (initialLoadComplete) {
       saveState("snapToGrid", snapToGrid);
     }
-  }, [snapToGrid]);
+  }, [snapToGrid, initialLoadComplete]);
 
   function nextNumber() {
     const max = desks

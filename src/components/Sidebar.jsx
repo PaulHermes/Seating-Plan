@@ -214,6 +214,7 @@ export default function Sidebar({
       >
         <label className="label">Schülernamen (eine pro Zeile)</label>
         <textarea
+          className="textarea"
           rows={6}
           value={namesText}
           onChange={(e) => setNamesText(e.target.value)}

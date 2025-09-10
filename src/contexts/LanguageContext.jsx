@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
-import { saveState } from "../lib/storage";
+import { saveState } from "../lib/storage"; 
 
 const LanguageContext = createContext();
 
@@ -27,11 +27,11 @@ const LANGUAGES = {
     saving: "Saving...",
     deleteObject: "Delete Object",
     objectName: "Object name",
-    objectLabel: "Object label",
+    objectLabel: "Object Label",
     snapshotSave: "Save Snapshot",
     snapshotLoad: "Load Snapshot",
     rotatable: "Rotatable",
-    deletable: "Removable",
+    deletable: "removable",
     gridSize: "Grid size",
     snapToGrid: "Snap to grid",
     sidebarHint: "Move desks in plan",

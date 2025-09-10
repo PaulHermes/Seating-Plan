@@ -333,71 +333,71 @@ export default function CanvasArea({
         ))}
 
         {shelves.map((shelf) => (
-  <div
-    key={shelf.id}
-    className="shelf"
-    onPointerDown={(e) => {
-      if (e.target.closest("button, input, textarea, select")) return;
-      startDrag(e, shelf, "shelf");
-    }}
-    onDoubleClick={(e) => {
-      e.stopPropagation();
-      const currentLabel = shelf.label || `Regal ${shelf.number}`;
-      const newLabel = prompt(
-        "Neuer Name für das Regal:",
-        currentLabel,
-      );
-      if (newLabel !== null) {
-        setShelves((prev) =>
-          prev.map((s) =>
-            s.id === shelf.id
-              ? { ...s, label: newLabel.trim() }
-              : s
-          )
-        );
-      }
-    }}
-    style={{
-      left: shelf.x,
-      top: shelf.y,
-      width: shelf.w,
-      height: shelf.h,
-      transform: `rotate(${shelf.rotate || 0}deg)`,
-      position: "absolute",
-      background: "#8b5cf6",
-      borderRadius: "6px",
-      padding: "6px",
-      boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
-      cursor: "grab",
-      userSelect: "none",
-      touchAction: "none",
-    }}
-  >
-    <div className="desk-header">
-      <div className="desk-number">{shelf.label || `Regal ${shelf.number}`}</div>
-      <div className="desk-actions">
-        <button
-          className="small-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            rotateShelf(shelf.id);
-          }}
-        >
-          ⟳
-        </button>
-        <button
-          className="small-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            removeShelf(shelf.id);
-          }}
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-  </div>
-))}
+          <div
+            key={shelf.id}
+            className="shelf"
+            onPointerDown={(e) => {
+              if (e.target.closest("button, input, textarea, select")) return;
+              startDrag(e, shelf, "shelf");
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              const currentLabel = shelf.label || `Regal ${shelf.number}`;
+              const newLabel = prompt(
+                "Neuer Name für das Regal:",
+                currentLabel,
+              );
+              if (newLabel !== null) {
+                setShelves((prev) =>
+                  prev.map((s) =>
+                    s.id === shelf.id ? { ...s, label: newLabel.trim() } : s,
+                  ),
+                );
+              }
+            }}
+            style={{
+              left: shelf.x,
+              top: shelf.y,
+              width: shelf.w,
+              height: shelf.h,
+              transform: `rotate(${shelf.rotate || 0}deg)`,
+              position: "absolute",
+              background: "#8b5cf6",
+              borderRadius: "6px",
+              padding: "6px",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+              cursor: "grab",
+              userSelect: "none",
+              touchAction: "none",
+            }}
+          >
+            <div className="desk-header">
+              <div className="desk-number">
+                {shelf.label || `Regal ${shelf.number}`}
+              </div>
+              <div className="desk-actions">
+                <button
+                  className="small-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    rotateShelf(shelf.id);
+                  }}
+                >
+                  ⟳
+                </button>
+                <button
+                  className="small-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeShelf(shelf.id);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
 
         {customObjects.map((obj) => {
           const tpl = templates?.find((t) => t.id === obj.templateId) || {};

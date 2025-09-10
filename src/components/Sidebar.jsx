@@ -269,7 +269,7 @@ export default function Sidebar({
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             }}
           >
-            <h3 style={{ marginTop: 0 }}>Neue Vorlage</h3>
+            <h3 style={{ marginTop: 0 }}>Neues Objekt</h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <input

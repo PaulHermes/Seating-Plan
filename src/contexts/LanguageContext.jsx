@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
+import { saveState } from "../lib/storage";
 
 const LanguageContext = createContext();
 
@@ -26,11 +27,11 @@ const LANGUAGES = {
     saving: "Saving...",
     deleteObject: "Delete Object",
     objectName: "Object name",
-    objectLabel: "Object Label",
+    objectLabel: "Object label",
     snapshotSave: "Save Snapshot",
     snapshotLoad: "Load Snapshot",
     rotatable: "Rotatable",
-    deletable: "removable",
+    deletable: "Removable",
     gridSize: "Grid size",
     snapToGrid: "Snap to grid",
     sidebarHint: "Move desks in plan",
@@ -88,7 +89,20 @@ const LANGUAGES = {
 };
 
 export const LanguageProvider = ({ children }) => {
-  const [lang, setLang] = useState("de");
+  const [lang, setLangState] = useState("de");
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const setLang = (newLang) => {
+    setLangState(newLang);
+    if (isInitialized) {
+      saveState("language", newLang);
+    }
+  };
+
+  useEffect(() => {
+    setIsInitialized(true);
+  }, []);
+
   const t = (key) => LANGUAGES[lang][key] || key;
 
   return (

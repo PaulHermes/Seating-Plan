@@ -34,7 +34,8 @@ export default function App() {
   const [gridSize, setGridSize] = useState(20);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-  const { t } = useLanguage();
+  const { t, setLang } = useLanguage();
+
   // load saved state on mount
   useEffect(() => {
     (async () => {
@@ -47,6 +48,7 @@ export default function App() {
       const names = (await loadState("namesText")) || "";
       const gs = (await loadState("gridSize")) || 20;
       const snap = await loadState("snapToGrid");
+      const language = (await loadState("language")) || "de";
 
       // Ensure rotate exists and is numeric (migration for older saved data)
       setDesks(
@@ -73,10 +75,11 @@ export default function App() {
       setNamesText(names);
       setGridSize(gs);
       setSnapToGrid(snap === undefined ? true : snap);
+      setLang(language);
 
       setInitialLoadComplete(true);
     })();
-  }, []);
+  }, [setLang]);
 
   useEffect(() => {
     if (initialLoadComplete) {
@@ -656,6 +659,7 @@ export default function App() {
         setGridSize={setGridSize}
         snapToGrid={snapToGrid}
         setSnapToGrid={setSnapToGrid}
+        initialLoadComplete={initialLoadComplete}
       />
 
       <CanvasArea

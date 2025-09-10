@@ -66,7 +66,7 @@ export default function Sidebar({
         addTemplate(tpl);
       } else {
         console.warn(
-          "addTemplate ist nicht definiert — Vorlage wurde nicht gespeichert.",
+          "addTemplate ist nicht definiert — Objekt wurde nicht gespeichert.",
         );
       }
     } catch (err) {
@@ -86,7 +86,7 @@ export default function Sidebar({
   function onDeleteTemplate(id) {
     if (!setTemplates) {
       return alert(
-        "setTemplates nicht verfügbar — Vorlage kann nicht gelöscht.",
+        "setTemplates nicht verfügbar — Objekt kann nicht gelöscht.",
       );
     }
     setTemplates((prev) => prev.filter((t) => t.id !== id));
@@ -175,7 +175,7 @@ export default function Sidebar({
                     );
                   }
                 }}
-                title={`Vorlage: ${t.name}`}
+                title={`Objekt: ${t.name}`}
               >
                 <span style={{ fontWeight: 700 }}>{t.name}</span>
               </button>
@@ -183,7 +183,7 @@ export default function Sidebar({
               <button
                 className="small-btn"
                 onClick={() => onDeleteTemplate(t.id)}
-                title="Vorlage löschen"
+                title="Objekt löschen"
                 style={{ flex: "0 0 auto" }}
               >
                 ✕
@@ -202,8 +202,8 @@ export default function Sidebar({
                 gap: 8,
               }}
             >
-              <span style={{ fontSize: 18, lineHeight: 1 }}>+</span> Neue
-              Vorlage
+              <span style={{ fontSize: 18, lineHeight: 1 }}>+</span>
+              Neues Objekt
             </button>
           </div>
         </div>
@@ -364,7 +364,7 @@ export default function Sidebar({
                   onClick={onSaveTemplate}
                   disabled={tplSaving}
                 >
-                  {tplSaving ? "Speichern…" : "Vorlage speichern"}
+                  {tplSaving ? "Speichern…" : "Objekt speichern"}
                 </button>
               </div>
             </div>

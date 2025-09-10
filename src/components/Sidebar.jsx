@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function Sidebar({
   namesText,
@@ -23,6 +24,7 @@ export default function Sidebar({
   setTemplates,
 }) {
   const fileRef = useRef();
+  const { t, lang, setLang } = useLanguage();
 
   const [tplModalOpen, setTplModalOpen] = useState(false);
   const [tplName, setTplName] = useState("");
@@ -94,12 +96,12 @@ export default function Sidebar({
 
   return (
     <div className="sidebar">
-      <h3>Sitzplan</h3>
+      <h3>{t("seatingPlan")}</h3>
       <div style={{ position: "absolute", top: 8, right: 8 }}>
         <button
           className="small-btn"
           onClick={() => setSettingsOpen(true)}
-          title="Einstellungen"
+          title={t("settings")}
           style={{
             background: "transparent",
             border: "none",
@@ -121,44 +123,44 @@ export default function Sidebar({
 
       <div className="btn-row">
         <button className="btn primary" onClick={() => addDesk("single")}>
-          Einzeltisch
+          {t("singleDesk")}
         </button>
         <button className="btn success" onClick={() => addDesk("double")}>
-          Zweiertisch
+          {t("doubleDesk")}
         </button>
         <button className="btn blackboard" onClick={() => addBoard()}>
-          Tafel
+          {t("board")}
         </button>
         <button className="btn teacher-desk" onClick={addTeacherDesk}>
-          Lehrertisch
+          {t("teacherDesk")}
         </button>
         <button className="btn shelf" onClick={addShelf}>
-          Regal
+          {t("shelf")}
         </button>
       </div>
 
       <div
         style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 12 }}
       >
-        <h4 style={{ margin: "6px 0" }}>Benutzerdefinierte Objekte</h4>
+        <h4 style={{ margin: "6px 0" }}>{t("customObjects")}</h4>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {templates.length === 0 && (
             <div style={{ color: "#666", fontSize: 13 }}>
-              Keine Objekte vorhanden.
+              {t("noObjects")}
             </div>
           )}
 
-          {templates.map((t) => (
+          {templates.map((tab) => (
             <div
-              key={t.id}
+              key={tab.id}
               style={{ display: "flex", gap: 8, alignItems: "center" }}
             >
               <button
                 className="btn"
                 style={{
-                  background: t.color || "#eee",
-                  color: t.textColor || "#111",
+                  background: tab.color || "#eee",
+                  color: tab.textColor || "#111",
                   border: "1px solid rgba(0,0,0,0.08)",
                   flex: 1,
                   display: "flex",
@@ -168,22 +170,22 @@ export default function Sidebar({
                 }}
                 onClick={() => {
                   if (typeof createFromTemplate === "function") {
-                    createFromTemplate(t.id);
+                    createFromTemplate(tab.id);
                   } else {
                     alert(
                       "Platzieren nicht verfügbar — erstelle die Instanz-Funktionen in App.jsx (Group B).",
                     );
                   }
                 }}
-                title={`Objekt: ${t.name}`}
+                title={`Objekt: ${tab.name}`}
               >
-                <span style={{ fontWeight: 700 }}>{t.name}</span>
+                <span style={{ fontWeight: 700 }}>{tab.name}</span>
               </button>
 
               <button
                 className="small-btn"
-                onClick={() => onDeleteTemplate(t.id)}
-                title="Objekt löschen"
+                onClick={() => onDeleteTemplate(tab.id)}
+                title={t("deleteObject")}
                 style={{ flex: "0 0 auto" }}
               >
                 ✕
@@ -203,7 +205,7 @@ export default function Sidebar({
               }}
             >
               <span style={{ fontSize: 18, lineHeight: 1 }}>+</span>
-              Neues Objekt
+              {t("newObject")}
             </button>
           </div>
         </div>
@@ -212,7 +214,7 @@ export default function Sidebar({
       <div
         style={{ marginTop: 12, borderTop: "1px solid #eee", paddingTop: 12 }}
       >
-        <label className="label">Schülernamen (eine pro Zeile)</label>
+        <label className="label">{t("studentNames")}</label>
         <textarea
           className="textarea"
           rows={6}
@@ -222,25 +224,20 @@ export default function Sidebar({
 
         <div className="btn-col">
           <button className="btn purple" onClick={generateAssignments}>
-            Zuweisen
+            {t("assign")}
           </button>
           <button className="btn" onClick={clearAssignments}>
-            Zurücksetzen
+            {t("reset")}
           </button>
         </div>
 
         <div className="btn-col">
           <button className="btn yellow" onClick={printPlan}>
-            Drucken
+            {t("printOut")}
           </button>
         </div>
       </div>
-      <div className="btn-col">
-        <button className="btn" onClick={() => setSettingsOpen(true)}>
-          Einstellungen
-        </button>
-      </div>
-      <div className="hint">Ziehe Tische im Plan.</div>
+      <div className="hint">{t("sidebarHint")}</div>
 
       {tplModalOpen && (
         <div
@@ -269,17 +266,17 @@ export default function Sidebar({
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             }}
           >
-            <h3 style={{ marginTop: 0 }}>Neues Objekt</h3>
+            <h3 style={{ marginTop: 0 }}>{t("newObject")}</h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <input
-                placeholder="Objektname"
+                placeholder={t("objectName")}
                 value={tplName}
                 onChange={(e) => setTplName(e.target.value)}
                 style={{ width: "100%", padding: 8 }}
               />
               <input
-                placeholder="Beschriftung (auf Objekt)"
+                placeholder={t("objectLabel")}
                 value={tplLabel}
                 onChange={(e) => setTplLabel(e.target.value)}
                 style={{ width: "100%", padding: 8 }}
@@ -289,7 +286,7 @@ export default function Sidebar({
                 <label
                   style={{ display: "flex", alignItems: "center", gap: 6 }}
                 >
-                  <div style={{ fontSize: 12 }}>Farbe</div>
+                  <div style={{ fontSize: 12 }}>{t("colour")}</div>
                   <input
                     type="color"
                     value={tplColor}
@@ -300,7 +297,7 @@ export default function Sidebar({
                 <label
                   style={{ display: "flex", alignItems: "center", gap: 6 }}
                 >
-                  <div style={{ fontSize: 12 }}>Text</div>
+                  <div style={{ fontSize: 12 }}>{t("text")}</div>
                   <input
                     type="color"
                     value={tplTextColor}
@@ -310,14 +307,14 @@ export default function Sidebar({
               </div>
 
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <label style={{ fontSize: 12 }}>W</label>
+                <label style={{ fontSize: 12 }}>{t("width")}</label>
                 <input
                   type="number"
                   value={tplW}
                   onChange={(e) => setTplW(Number(e.target.value))}
                   style={{ width: 80, padding: 6 }}
                 />
-                <label style={{ fontSize: 12 }}>H</label>
+                <label style={{ fontSize: 12 }}>{t("height")}</label>
                 <input
                   type="number"
                   value={tplH}
@@ -332,7 +329,7 @@ export default function Sidebar({
                   checked={tplRot}
                   onChange={(e) => setTplRot(e.target.checked)}
                 />{" "}
-                rotierbar
+                {t("rotatable")}
               </label>
               <label>
                 <input
@@ -340,7 +337,7 @@ export default function Sidebar({
                   checked={tplDel}
                   onChange={(e) => setTplDel(e.target.checked)}
                 />{" "}
-                löschbar
+                {t("deletable")}
               </label>
 
               <div
@@ -357,14 +354,14 @@ export default function Sidebar({
                     setTplModalOpen(false);
                   }}
                 >
-                  Abbrechen
+                  {t("cancel")}
                 </button>
                 <button
                   className="btn primary"
                   onClick={onSaveTemplate}
                   disabled={tplSaving}
                 >
-                  {tplSaving ? "Speichern…" : "Objekt speichern"}
+                  {tplSaving ? t("saving") : t("saveObject")}
                 </button>
               </div>
             </div>
@@ -399,8 +396,19 @@ export default function Sidebar({
               boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
             }}
           >
-            <h3 style={{ marginTop: 0 }}>Einstellungen</h3>
-
+            <h3 style={{ marginTop: 0 }}>{t("settings")}</h3>
+            <div style={{ marginTop: 12 }}>
+  <label style={{ display: "block", marginBottom: 6 }}>{t("language")}</label>
+  <select
+    value={lang}
+    onChange={(e) => setLang(e.target.value)}
+    style={{ width: "100%", padding: 6 }}
+  >
+    <option value="de">Deutsch</option>
+    <option value="en">English</option>
+    {/* Add more languages here if needed */}
+  </select>
+</div>
             <div
               style={{
                 marginTop: 12,
@@ -409,7 +417,7 @@ export default function Sidebar({
               }}
             >
               <div className="grid-size-container">
-                <div className="grid-size-label">Rastergröße: {gridSize}</div>
+                <div className="grid-size-label">{t("gridSize")}: {gridSize}</div>
                 <input
                   type="range"
                   min={20}
@@ -424,7 +432,7 @@ export default function Sidebar({
                   checked={snapToGrid}
                   onChange={(e) => setSnapToGrid(e.target.checked)}
                 />
-                Einrasten an
+                {t("snapToGrid")}
               </label>
             </div>
             <div
@@ -436,7 +444,7 @@ export default function Sidebar({
             >
               <div className="btn-col" style={{ marginTop: 16 }}>
                 <button className="btn" onClick={saveSnapshot}>
-                  Snapshot speichern
+                  {t("snapshotSave")}
                 </button>
 
                 <button
@@ -444,7 +452,7 @@ export default function Sidebar({
                   onClick={() => fileRef.current && fileRef.current.click()}
                   style={{ marginTop: 8 }}
                 >
-                  Snapshot importieren
+                  {t("snapshotLoad")}
                 </button>
                 <input
                   type="file"
@@ -464,7 +472,7 @@ export default function Sidebar({
               }}
             >
               <button className="btn" onClick={() => setSettingsOpen(false)}>
-                Schließen
+                {t("close")}
               </button>
             </div>
           </div>

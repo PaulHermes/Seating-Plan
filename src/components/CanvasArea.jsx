@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { useLanguage } from "../contexts/LanguageContext";
 
 export default function CanvasArea({
   desks,
@@ -28,6 +29,7 @@ export default function CanvasArea({
 }) {
   const containerRef = useRef(null);
   const draggingRef = useRef(null);
+  const { t } = useLanguage();
 
   function startDrag(e, item, itemType = "desk") {
     e.stopPropagation();
@@ -202,7 +204,7 @@ export default function CanvasArea({
           >
             <div className="desk-header">
               <div className="desk-number">
-                {desk.isTeacher ? "Lehrer*in" : `Tisch ${desk.number}`}
+                {desk.isTeacher ? t("teacherDesk") : `${t("desk")} ${desk.number}`}
               </div>
               <div className="desk-actions">
                 {desk.seats === 2 &&
@@ -261,7 +263,7 @@ export default function CanvasArea({
                       e.stopPropagation();
                       const currentName = assignments[key]?.name || "";
                       const newName = prompt(
-                        "Name für diesen festen Platz:",
+                        t("nameLockedSeat"),
                         currentName,
                       );
                       if (newName !== null) {
@@ -272,8 +274,8 @@ export default function CanvasArea({
                       }
                     }}
                   >
-                    <div className="seat-label">Sitz {i + 1}</div>
-                    <div className="seat-name">{name || "(frei)"}</div>
+                    <div className="seat-label">{t("seat")} {i + 1}</div>
+                    <div className="seat-name">{name || t("empty")}</div>
                   </div>
                 );
               })}
@@ -306,7 +308,7 @@ export default function CanvasArea({
               alignItems: "center",
             }}
           >
-            <div style={{ pointerEvents: "none" }}>{board.label}</div>
+            <div style={{ pointerEvents: "none" }}>{t("board")}</div>
 
             <div className="board-actions">
               <button
@@ -342,9 +344,9 @@ export default function CanvasArea({
             }}
             onDoubleClick={(e) => {
               e.stopPropagation();
-              const currentLabel = shelf.label || `Regal ${shelf.number}`;
+              const currentLabel = shelf.label || `${t("shelf")} ${shelf.number}`;
               const newLabel = prompt(
-                "Neuer Name für das Regal:",
+                t("nameShelf"),
                 currentLabel,
               );
               if (newLabel !== null) {
@@ -373,7 +375,7 @@ export default function CanvasArea({
           >
             <div className="desk-header">
               <div className="desk-number">
-                {shelf.label || `Regal ${shelf.number}`}
+                {shelf.label || `${t("shelf")} ${shelf.number}`}
               </div>
               <div className="desk-actions">
                 <button
@@ -464,9 +466,6 @@ export default function CanvasArea({
           );
         })}
 
-        <div className="legend">
-          T = Tischnummer · Doppeltische haben 2 Sitze
-        </div>
       </div>
     </div>
   );

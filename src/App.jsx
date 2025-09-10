@@ -3,6 +3,7 @@ import CanvasArea from "./components/CanvasArea";
 import Sidebar from "./components/Sidebar";
 import { saveState, loadState } from "./lib/storage";
 import html2canvas from "html2canvas";
+import { useLanguage } from "./contexts/LanguageContext";
 
 const DESK_TYPES = {
   single: { seats: 1, w: 120, h: 80 },
@@ -33,7 +34,7 @@ export default function App() {
   const [gridSize, setGridSize] = useState(20);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-
+  const { t } = useLanguage();
   // load saved state on mount
   useEffect(() => {
     (async () => {
@@ -163,7 +164,7 @@ export default function App() {
       number: null,
       rotate: 0,
       isTeacher: true,
-      label: "Lehrer*in",
+      label: "teacher",
     };
     setDesks((d) => [...d, desk]);
   }

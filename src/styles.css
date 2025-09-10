@@ -129,8 +129,8 @@ body,
 }
 
 .grid-bg {
-  min-height: 1080px;
-  min-width: 1920px;
+  min-height: 2000px;
+  min-width: 2000px;
   position: relative;
   background-image:
     linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),

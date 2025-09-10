@@ -593,6 +593,8 @@ export default function App() {
       desks,
       boards,
       shelves,
+      templates,
+      customObjects,
       assignments,
       namesText,
       gridSize,
@@ -617,6 +619,8 @@ export default function App() {
         if (data.desks) setDesks(data.desks);
         if (data.boards) setBoards(data.boards);
         if (data.shelves) setShelves(data.shelves);
+        if (data.templates) setTemplates(data.templates);
+        if (data.customObjects) setCustomObjects(data.customObjects);
         if (data.assignments !== undefined) setAssignments(data.assignments);
         if (data.namesText) setNamesText(data.namesText);
         if (data.gridSize) setGridSize(data.gridSize);

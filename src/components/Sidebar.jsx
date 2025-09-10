@@ -146,9 +146,7 @@ export default function Sidebar({
 
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {templates.length === 0 && (
-            <div style={{ color: "#666", fontSize: 13 }}>
-              {t("noObjects")}
-            </div>
+            <div style={{ color: "#666", fontSize: 13 }}>{t("noObjects")}</div>
           )}
 
           {templates.map((tab) => (
@@ -398,17 +396,19 @@ export default function Sidebar({
           >
             <h3 style={{ marginTop: 0 }}>{t("settings")}</h3>
             <div style={{ marginTop: 12 }}>
-  <label style={{ display: "block", marginBottom: 6 }}>{t("language")}</label>
-  <select
-    value={lang}
-    onChange={(e) => setLang(e.target.value)}
-    style={{ width: "100%", padding: 6 }}
-  >
-    <option value="de">Deutsch</option>
-    <option value="en">English</option>
-    {/* Add more languages here if needed */}
-  </select>
-</div>
+              <label style={{ display: "block", marginBottom: 6 }}>
+                {t("language")}
+              </label>
+              <select
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+                style={{ width: "100%", padding: 6 }}
+              >
+                <option value="de">Deutsch</option>
+                <option value="en">English</option>
+                {/* Add more languages here if needed */}
+              </select>
+            </div>
             <div
               style={{
                 marginTop: 12,
@@ -417,7 +417,9 @@ export default function Sidebar({
               }}
             >
               <div className="grid-size-container">
-                <div className="grid-size-label">{t("gridSize")}: {gridSize}</div>
+                <div className="grid-size-label">
+                  {t("gridSize")}: {gridSize}
+                </div>
                 <input
                   type="range"
                   min={20}

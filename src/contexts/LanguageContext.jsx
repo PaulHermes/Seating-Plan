@@ -42,7 +42,7 @@ const LANGUAGES = {
     seat: "Seat",
     empty: "Empty",
     nameShelf: "New name for the shelf:",
-    teacher: "Teacher"
+    teacher: "Teacher",
   },
   de: {
     seatingPlan: "Sitzplan",
@@ -83,7 +83,7 @@ const LANGUAGES = {
     seat: "Sitz",
     empty: "Frei",
     nameShelf: "Neuer Name für das Regal:",
-    teacher: "Lehrer*in"
+    teacher: "Lehrer*in",
   },
 };
 

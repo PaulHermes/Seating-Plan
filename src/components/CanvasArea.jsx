@@ -204,7 +204,9 @@ export default function CanvasArea({
           >
             <div className="desk-header">
               <div className="desk-number">
-                {desk.isTeacher ? t("teacherDesk") : `${t("desk")} ${desk.number}`}
+                {desk.isTeacher
+                  ? t("teacherDesk")
+                  : `${t("desk")} ${desk.number}`}
               </div>
               <div className="desk-actions">
                 {desk.seats === 2 &&
@@ -262,10 +264,7 @@ export default function CanvasArea({
                     onDoubleClick={(e) => {
                       e.stopPropagation();
                       const currentName = assignments[key]?.name || "";
-                      const newName = prompt(
-                        t("nameLockedSeat"),
-                        currentName,
-                      );
+                      const newName = prompt(t("nameLockedSeat"), currentName);
                       if (newName !== null) {
                         setAssignments((prev) => ({
                           ...prev,
@@ -274,7 +273,9 @@ export default function CanvasArea({
                       }
                     }}
                   >
-                    <div className="seat-label">{t("seat")} {i + 1}</div>
+                    <div className="seat-label">
+                      {t("seat")} {i + 1}
+                    </div>
                     <div className="seat-name">{name || t("empty")}</div>
                   </div>
                 );
@@ -344,11 +345,9 @@ export default function CanvasArea({
             }}
             onDoubleClick={(e) => {
               e.stopPropagation();
-              const currentLabel = shelf.label || `${t("shelf")} ${shelf.number}`;
-              const newLabel = prompt(
-                t("nameShelf"),
-                currentLabel,
-              );
+              const currentLabel =
+                shelf.label || `${t("shelf")} ${shelf.number}`;
+              const newLabel = prompt(t("nameShelf"), currentLabel);
               if (newLabel !== null) {
                 setShelves((prev) =>
                   prev.map((s) =>
@@ -465,7 +464,6 @@ export default function CanvasArea({
             </div>
           );
         })}
-
       </div>
     </div>
   );

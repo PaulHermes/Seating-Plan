@@ -156,7 +156,7 @@ body,
 }
 .desk-number {
   font-weight: 600;
-  font-size: clamp(10px, 2vw, 12px);  /* grows/shrinks with space */
+  font-size: clamp(10px, 2vw, 12px); /* grows/shrinks with space */
   white-space: nowrap;
 }
 .desk-actions {
